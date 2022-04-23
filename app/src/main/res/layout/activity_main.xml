@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/darkBlue"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".controller.MainActivity">
+
+    <LinearLayout
+        android:id="@+id/main_app_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/main_textview_greeting"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:id="@+id/main_image_view"
+            android:paddingTop="12dp"
+            android:src="@drawable/light_icon_foreground" />
+        <TextView
+            android:id="@+id/main_textview_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:textStyle="bold"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="MyQUIZ"
+            android:textColor="@color/white"
+            android:textSize="32sp" />
+        <TextView
+            android:id="@+id/main_textview_app_slogan"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="Fun learning"
+            android:textColor="#FFC107"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/main_textview_greeting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:gravity="center"
+        android:lineSpacingExtra="20dp"
+        android:text="Bienvenue dans MyQuiz !"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@id/main_edittext_name"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_app_info" />
+
+    <EditText
+        android:id="@+id/main_edittext_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center"
+        android:hint="Entrez votre prénom pour jouer"
+        android:textColor="@color/white"
+        android:textColorHint="#99FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/main_button_play"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_textview_greeting" />
+
+    <Button
+        android:id="@+id/main_button_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/main_edittext_name"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/bluePastel"
+        android:paddingStart="48dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="48dp"
+        android:paddingBottom="8dp"
+        android:text="Jouer"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        app:cornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_edittext_name" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
