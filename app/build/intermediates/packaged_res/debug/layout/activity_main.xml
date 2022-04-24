@@ -43,9 +43,9 @@
             android:layout_weight="1"
             android:gravity="center"
             android:layout_gravity="center"
-            android:text="Fun learning"
+            android:text="Funny learning"
             android:textColor="#FFC107"
-            android:textSize="20sp"/>
+            android:textSize="16sp"/>
     </LinearLayout>
 
 
@@ -63,6 +63,19 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/main_app_info" />
+    <TextView
+        android:id="@+id/main_textview_highscore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:gravity="center"
+        android:text="Votre meilleur score est :"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@id/main_edittext_name"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_textview_greeting" />
 
     <EditText
         android:id="@+id/main_edittext_name"
@@ -78,13 +91,12 @@
         app:layout_constraintBottom_toTopOf="@id/main_button_play"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_textview_greeting" />
+        app:layout_constraintTop_toBottomOf="@id/main_textview_highscore" />
 
     <Button
         android:id="@+id/main_button_play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/main_edittext_name"
         android:layout_gravity="center_horizontal"
         android:layout_margin="16dp"
         android:backgroundTint="@color/bluePastel"

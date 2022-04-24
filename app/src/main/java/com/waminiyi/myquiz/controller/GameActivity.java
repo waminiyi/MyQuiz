@@ -30,29 +30,27 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Button mAnswerButton1;
     private Button mAnswerButton2;
     private Button mAnswerButton3;
-    private int mGain;
     private Button mAnswerButton4;
     private View mChoiceView;
-    private int mRemainingQuestionCount;
-    private int mCurrentQuestionIndex;
+    private final int mTotalQuestionCount = 4;
+    private int mQuestionCount;
     private Question mCurrentQuestion;
     private TextView mScoreTextView;
+    private TextView mQuestionCountTextView;
     private ProgressBar mProgressBar;
     private TextView mTimerTextView;
     private int progress;
     private int mScore;
     private boolean mAnswered;
-    private final int COUNTDOWN_IN_MILLIS=30000;
+    private final int COUNTDOWN_IN_MILLIS = 30000;
     public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE"; //clé associée au score
     private boolean mEnableTouchEvents; // boolean pour gérer les clics
     public static final String STATE_SCORE = "BUNDLE_STATE_SCORE";// à utiliser comme clé pour sauvegarder le score dans le bundle
-    public static final String STATE_QUESTION = "BUNDLE_STATE_QUESTION";
     public static final String STATE_QUESTION_INDEX = "BUNDLE_STATE_QUESTION_INDEX";
     public static final String STATE_QUESTION_LIST = "BUNDLE_STATE_QUESTION_LIST";
     private CountDownTimer mCountDownTimer;//pour le minuteur
     private long mTimeLeftInMillis;
     private static final String STATE_MILLIS_LEFT = "STATE_MILLIS_LEFT";
-    private static final String STATE_GAIN = "STATE_GAIN";
     private static final String STATE_ANSWER = "STATE_ANSWER";
     private ArrayList<Question> mQuestionList;
 
@@ -69,11 +67,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SCORE, mScore);
-        outState.putInt(STATE_QUESTION, mRemainingQuestionCount);
-        outState.putInt(STATE_QUESTION_INDEX, mCurrentQuestionIndex);
+        outState.putInt(STATE_QUESTION_INDEX, mQuestionCount);
         outState.putParcelableArrayList(STATE_QUESTION_LIST, mQuestionList);
         outState.putLong(STATE_MILLIS_LEFT, mTimeLeftInMillis);
-        outState.putInt(STATE_GAIN,mGain);
         outState.putBoolean(STATE_ANSWER, mAnswered);
     }
 
@@ -88,41 +84,28 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerButton2 = findViewById(R.id.game_activity_button_2);
         mAnswerButton3 = findViewById(R.id.game_activity_button_3);
         mAnswerButton4 = findViewById(R.id.game_activity_button_4);
-        mScoreTextView=findViewById(R.id.game_activity_textview_score);
-        mProgressBar=findViewById(R.id.progress_bar);
-        mTimerTextView=findViewById(R.id.game_activity_timer_text);
+        mScoreTextView = findViewById(R.id.game_activity_textview_score);
+        mQuestionCountTextView=findViewById(R.id.game_activity_textview_question_count);
+        mProgressBar = findViewById(R.id.progress_bar);
+        mTimerTextView = findViewById(R.id.game_activity_timer_text);
 
         mProgressBar.setMax(COUNTDOWN_IN_MILLIS);
 
+        if (savedInstanceState != null) {// null si rien n'avait été sauvegardé
 
-        if (savedInstanceState!=null){// null si rien n'avait été sauvegardé
-            mScore = savedInstanceState.getInt(STATE_SCORE);
-            mAnswered=savedInstanceState.getBoolean(STATE_ANSWER);
-            mRemainingQuestionCount = savedInstanceState.getInt(STATE_QUESTION);
-            mCurrentQuestionIndex=savedInstanceState.getInt(STATE_QUESTION_INDEX);
-            mQuestionList=savedInstanceState.getParcelableArrayList(STATE_QUESTION_LIST);
-            mTimeLeftInMillis=savedInstanceState.getLong(STATE_MILLIS_LEFT);
-            mGain=savedInstanceState.getInt(STATE_GAIN);
+            resumeCurrentGame(savedInstanceState);
 
-            if (mAnswered==true){
-                mCurrentQuestionIndex++;
-                mRemainingQuestionCount--;
-                mTimeLeftInMillis=COUNTDOWN_IN_MILLIS;
+            if (mAnswered) {
+                displayNextQuestion(COUNTDOWN_IN_MILLIS);
+            } else {
+                mQuestionCount--;
+                displayNextQuestion(mTimeLeftInMillis);
             }
 
-        }else{
-            mScore = 0;
-            mRemainingQuestionCount = 4;
-            mQuestionList=generateQuestions();
-            mCurrentQuestionIndex=0;
-            mTimeLeftInMillis=COUNTDOWN_IN_MILLIS;
-            mGain=300;
+        } else {
+            startNewGame();
         }
-        updateScore();
-        mAnswered=false;
-        mCurrentQuestion=mQuestionList.get(mCurrentQuestionIndex);
-        displayQuestion(mCurrentQuestion);
-        mEnableTouchEvents=true; //activation des boutons
+        mScoreTextView.setText("Score : " + mScore);
 
         // Le même listener est utilisé pour les 4 boutons en implémentant View.OnClickListener pour la GameActivity
         // L'id des boutons permettra de distinguer celui qui a été cliqué
@@ -137,37 +120,63 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     //vérification du choix du joueur
     public void onClick(View v) {
         //mise en place du lien entre le bouton cliqué et l'indice du choix correspondant
-        mChoiceView=v;
-        mCountDownTimer.cancel();
-        mAnswered=true;
+        mChoiceView = v;
         checkAnswer();
     }
 
-    private void displayQuestion(final Question question) {
-        // mise à jour de l'interface en affichant l'énoncé de la question et les choix possibles
-        mQuestionTextView.setText(question.getQuestionText().toString());
-        mAnswerButton1.setText(question.getChoiceList().get(0));
-        mAnswerButton2.setText(question.getChoiceList().get(1));
-        mAnswerButton3.setText(question.getChoiceList().get(2));
-        mAnswerButton4.setText(question.getChoiceList().get(3));
+    private void startNewGame(){
+        mScore = 0;
+        mQuestionList = generateQuestions();
+        mQuestionCount = 0;
+        displayNextQuestion(COUNTDOWN_IN_MILLIS);
+    }
 
+    private void resumeCurrentGame(Bundle bundle){
+        mQuestionList = bundle.getParcelableArrayList(STATE_QUESTION_LIST);
+        mQuestionCount = bundle.getInt(STATE_QUESTION_INDEX);
+        mScore = bundle.getInt(STATE_SCORE);
+        mTimeLeftInMillis = bundle.getLong(STATE_MILLIS_LEFT);
+        mAnswered = bundle.getBoolean(STATE_ANSWER);
+    }
+
+    private void displayNextQuestion(long duration) {
+        // mise à jour de l'interface en affichant l'énoncé de la question et les choix possibles
         mAnswerButton1.setTextColor(Color.BLACK);
         mAnswerButton2.setTextColor(Color.BLACK);
         mAnswerButton3.setTextColor(Color.BLACK);
         mAnswerButton4.setTextColor(Color.BLACK);
 
-        startCountDown();
+        if (mQuestionCount < mTotalQuestionCount) {
+
+            mCurrentQuestion = mQuestionList.get(mQuestionCount);
+
+            mQuestionTextView.setText(mCurrentQuestion.getQuestionText());
+            mAnswerButton1.setText(mCurrentQuestion.getChoiceList().get(0));
+            mAnswerButton2.setText(mCurrentQuestion.getChoiceList().get(1));
+            mAnswerButton3.setText(mCurrentQuestion.getChoiceList().get(2));
+            mAnswerButton4.setText(mCurrentQuestion.getChoiceList().get(3));
+
+            mQuestionCount++;
+            mQuestionCountTextView.setText("Question: " + mQuestionCount + "/" + mTotalQuestionCount);
+            mAnswered = false;
+            mTimeLeftInMillis=duration;
+            startCountDown();
+
+        } else {
+            endGame();
+        }
+        mEnableTouchEvents = true;// réactivation des boutons
+
     }
+
     //méthode qui gère le démarrage du minuteur
     private void startCountDown() {
         mCountDownTimer = new CountDownTimer(mTimeLeftInMillis, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
                 mTimeLeftInMillis = millisUntilFinished;
-                progress=(int)mTimeLeftInMillis;
-                mGain-=1;
+                progress = (int) mTimeLeftInMillis;
                 updateCountDownText();
-                updateProgress();
             }
 
             @Override
@@ -175,7 +184,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 mTimeLeftInMillis = 0;
                 updateCountDownText();
                 showAnswer();
-                displayNextQuestion();
+                displayNextQuestion(COUNTDOWN_IN_MILLIS);
             }
         }.start();
     }
@@ -186,6 +195,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         //formatage  du minuteur minute:seconde
         String timeFormatted = String.format(Locale.getDefault(), "%02d", seconds);
         mTimerTextView.setText(timeFormatted);
+        mProgressBar.setProgress(progress);
         //changement de la couleur du tetxe quand le temps restant est inférieur à 10 secondes
         if (mTimeLeftInMillis < 10000) {
             mTimerTextView.setTextColor(Color.RED);
@@ -194,8 +204,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void checkAnswer(){
+
+    private void checkAnswer() {
         //mise en place du lien entre le bouton cliqué et l'indice du choix correspondant
+        mCountDownTimer.cancel();
+        mAnswered = true;
+        mEnableTouchEvents = false;
         int choiceIndex;
 
         //si la vue correspond au bouton1, alors la réponse choisie est la première dans notre liste
@@ -213,13 +227,20 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         if (choiceIndex == mCurrentQuestion.getAnswerIndex()) {
             Toast.makeText(this, "Réponse correcte!", Toast.LENGTH_SHORT).show();
-            upgradeScore();
-            mScoreTextView.setText("Score : "+ mScore);
+            int gain;
+            gain = (int) ((300 * mTimeLeftInMillis) / COUNTDOWN_IN_MILLIS);
+            if (gain <= 10) {
+                mScore = mScore + 10;
+            } else {
+                mScore = mScore + gain;
+            }
+
+            mScoreTextView.setText("Score : " + mScore);
         } else {
             Toast.makeText(this, "Réponse incorrecte!", Toast.LENGTH_SHORT).show();
         }
         //désactivation des boutons après le choix de l'utilisateur
-        mEnableTouchEvents=false;
+
         showAnswer();
 
         /*Objet qui un temps d'exécution
@@ -230,28 +251,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 //code dont l'exécution doit atteindre la fin du toast
-                displayNextQuestion();
+                displayNextQuestion(COUNTDOWN_IN_MILLIS);
             }
         }, 3_000); // temps d'exécution
 
     }
 
-    private void displayNextQuestion(){
-        mRemainingQuestionCount--;
-        //tant qu'il reste des questions, afficher la question suivante
-        if (mRemainingQuestionCount > 0) {
-            mCurrentQuestionIndex++;
-            mCurrentQuestion = mQuestionList.get(mCurrentQuestionIndex);
-            mTimeLeftInMillis=COUNTDOWN_IN_MILLIS;
-            displayQuestion(mCurrentQuestion);
-            mAnswered=false;
-        } else {
-            endGame();
-        }
-        mEnableTouchEvents=true;// réactivation des boutons
-    }
-
-    private void showAnswer(){
+    private void showAnswer() {
         mAnswerButton1.setTextColor(Color.RED);
         mAnswerButton2.setTextColor(Color.RED);
         mAnswerButton3.setTextColor(Color.RED);
@@ -272,16 +278,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    private void updateProgress(){
-        mProgressBar.setProgress(progress);
-    }
-    private void updateScore(){
-        mScoreTextView.setText("Score : "+ mScore);
-    }
 
-    private void upgradeScore(){
-        mScore=mScore+mGain;
-    }
     private void endGame() {
 
         //plus de questions? affichage du score final et fin du jeu
@@ -303,7 +300,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 .show();
     }
 
-    private ArrayList <Question> generateQuestions() {
+    private ArrayList<Question> generateQuestions() {
         // création des questions
         Question question1 = new Question(
                 "Quel animal est le roitelet?",
@@ -487,7 +484,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         );
 
         // renvoi de la banque de question
-        ArrayList <Question>  list= new ArrayList<> (Arrays.asList(question1, question2, question3, question4, question5, question6,
+        ArrayList<Question> list = new ArrayList<>(Arrays.asList(question1, question2, question3, question4, question5, question6,
                 question7, question8, question9, question10, question11, question12, question13, question14, question15,
                 question16, question17, question18, question19, question20, question21, question22, question23, question24,
                 question25, question26, question27, question28, question29, question30));

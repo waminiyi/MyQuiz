@@ -1,6 +1,7 @@
 package com.waminiyi.myquiz.controller;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SHARED_PREF_USER_INFO = "SHARED_PREF_USER_INFO";//constante qui servina de nom au fichier dans lequel enregistrer les préférences du joueur
     private static final String SHARED_PREF_USER_INFO_NAME = "SHARED_PREF_USER_INFO_NAME";//clé pour stocker le nom du joueur
     private static final String SHARED_PREF_USER_INFO_SCORE = "SHARED_PREF_USER_INFO_SCORE";
+    private TextView mHighScoreTextView;
     private User mUser = new User();
 
     /**
@@ -38,17 +40,11 @@ public class MainActivity extends AppCompatActivity {
             //récupération du score
             int score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE, 0);
             if (score>mHighScore){
-                mHighScore=score;
+                updateHighscore(score);
             }
-            getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE)
-                    .edit()
-                    .putInt(SHARED_PREF_USER_INFO_SCORE, mHighScore)
-                    .apply();
         }
 
     }
-
-
 
     @Override
     protected void onResume() {
@@ -64,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         mGreetingTextView = findViewById(R.id.main_textview_greeting);
         mNameEditText = findViewById(R.id.main_edittext_name);
         mPlayButton = findViewById(R.id.main_button_play);
+        mHighScoreTextView=findViewById(R.id.main_textview_highscore);
 
         mNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -104,21 +101,37 @@ public class MainActivity extends AppCompatActivity {
     private void updateScreen() {
         String firstName, welcomeText, playButtonText;
         firstName = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_NAME, null);//récupération du nom s'il y en a un
-        mHighScore = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getInt(SHARED_PREF_USER_INFO_SCORE, 0);
 
         if (firstName == null) {
             mPlayButton.setEnabled(false);
             welcomeText = "Bienvenue dans MyQuiz !";
             playButtonText = "Jouer";
-
+            mHighScoreTextView.setVisibility(View.GONE);
         } else {
-            welcomeText = "Bon retour " + firstName + " !\n Votre meilleur score : \n" + mHighScore;
+            welcomeText = "Bon retour " + firstName + " !";
             playButtonText = "Faire mieux";
         }
 
         mGreetingTextView.setText(welcomeText);
         mPlayButton.setText(playButtonText);
         mNameEditText.setText(firstName);
+        loadHighscore();
+    }
+
+    private void loadHighscore() {
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE);
+        mHighScore = prefs.getInt(SHARED_PREF_USER_INFO_SCORE, 0);
+        mHighScoreTextView.setText("Votre meilleur score: " + mHighScore);
+    }
+
+    private void updateHighscore(int newHighScore) {
+        mHighScore = newHighScore;
+        mHighScoreTextView.setText("Votre meilleur score: " + mHighScore);
+
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SHARED_PREF_USER_INFO_SCORE, mHighScore);
+        editor.apply();
     }
 
 }

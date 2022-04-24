@@ -1922,6 +1922,7 @@ id game_activity_button_2
 id game_activity_button_3
 id game_activity_button_4
 id game_activity_textview_question
+id game_activity_textview_question_count
 id game_activity_textview_score
 id game_activity_timer
 id game_activity_timer_text
@@ -1968,6 +1969,7 @@ id main_image_view
 id main_textview_app_name
 id main_textview_app_slogan
 id main_textview_greeting
+id main_textview_highscore
 id masked
 id material_clock_display
 id material_clock_face
