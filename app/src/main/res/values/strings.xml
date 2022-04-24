@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MyQuiz</string>
+    <string name="score">Votre score est : \n</string>
+    <string name="gameEnd">Fin de la partie</string>
+    <string name="newGame">Rejouer</string>
+    <string name="endGame">Quitter</string>
 </resources>

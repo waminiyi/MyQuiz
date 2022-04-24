@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -157,6 +158,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             mAnswerButton4.setText(mCurrentQuestion.getChoiceList().get(3));
 
             mQuestionCount++;
+            mScoreTextView.setText("Score : " + mScore);
             mQuestionCountTextView.setText("Question: " + mQuestionCount + "/" + mTotalQuestionCount);
             mAnswered = false;
             mTimeLeftInMillis=duration;
@@ -283,10 +285,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         //plus de questions? affichage du score final et fin du jeu
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle("Partie terminée!")
-                .setMessage("Votre score: " + mScore)
-                .setPositiveButton("Terminer", new DialogInterface.OnClickListener() {
+        LayoutInflater inflater=getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.dialog, null));
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+                builder.setPositiveButton(R.string.endGame, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //création d'un Intent pour enregistrer le score et le récupérer dans MainActivity
@@ -296,8 +299,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         finish();
                     }
                 })
-                .create()
-                .show();
+                .setNegativeButton(R.string.newGame, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                            startNewGame();
+                    }
+                });
+        builder.create();
+        builder.show();
     }
 
     private ArrayList<Question> generateQuestions() {
