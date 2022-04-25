@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -40,6 +39,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private TextView mQuestionCountTextView;
     private ProgressBar mProgressBar;
     private TextView mTimerTextView;
+    private int mGameHighScore;
     private int progress;
     private int mScore;
     private boolean mAnswered;
@@ -282,19 +282,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void endGame() {
-
+        if (mScore > mGameHighScore){
+            mGameHighScore=mScore;
+        }
         //plus de questions? affichage du score final et fin du jeu
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater=getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.dialog, null));
-        // Inflate and set the layout for the dialog
-        // Pass null as the parent view because its going in the dialog layout
-                builder.setPositiveButton(R.string.endGame, new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.gameEnd) // définition du titre de la boîte de dialogue
+                .setMessage(R.string.score + mScore) // définition du texte à afficher dans la boite de dialogue
+                .setPositiveButton(R.string.endGame, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //création d'un Intent pour enregistrer le score et le récupérer dans MainActivity
                         Intent intent = new Intent();
-                        intent.putExtra(BUNDLE_EXTRA_SCORE, mScore);
+                        intent.putExtra(BUNDLE_EXTRA_SCORE, mGameHighScore);
                         setResult(RESULT_OK, intent);// indique au système que l'activité s'est terminée correctement
                         finish();
                     }
