@@ -17,11 +17,11 @@ drawable light_icon_foreground
 drawable round_button
 drawable round_text_view
 drawable screens
-id dialog_tittle
 id game_activity_button_1
 id game_activity_button_2
 id game_activity_button_3
 id game_activity_button_4
+id game_activity_radio_group
 id game_activity_textview_question
 id game_activity_textview_question_count
 id game_activity_textview_score
@@ -36,10 +36,8 @@ id main_textview_app_slogan
 id main_textview_greeting
 id main_textview_highscore
 id progress_bar
-id score_text
 layout activity_game
 layout activity_main
-layout dialog
 mipmap ic_launcher
 mipmap ic_launcher_round
 mipmap light_icon

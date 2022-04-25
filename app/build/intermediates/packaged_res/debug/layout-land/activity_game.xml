@@ -11,16 +11,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
-        android:layout_margin="12dp">
+        android:layout_weight="3">
 
         <TextView
             android:id="@+id/game_activity_textview_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_marginBottom="32dp"
             android:layout_marginStart="8dp"
+            android:layout_marginBottom="32dp"
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="20sp"
@@ -29,14 +28,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Score : 0" />
+
         <TextView
             android:id="@+id/game_activity_textview_question_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:layout_marginStart="8dp"
-            android:layout_marginBottom="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="20sp"
@@ -70,9 +70,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="@+id/progress_bar"
                 app:layout_constraintEnd_toEndOf="@+id/progress_bar"
                 app:layout_constraintStart_toStartOf="@+id/progress_bar"
@@ -84,9 +84,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="12"
-        android:orientation="horizontal"
-        android:layout_margin="4dp">
+        android:layout_margin="4dp"
+        android:layout_weight="10"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/game_activity_textview_question"
@@ -96,7 +96,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="4dp"
-            android:layout_weight="3"
+            android:layout_weight="1"
             android:background="@drawable/round_text_view"
             android:gravity="center"
             android:lineSpacingExtra="4dp"
@@ -106,71 +106,57 @@
             android:textStyle="bold"
             tools:text="Question?" />
 
-        <LinearLayout
+        <RadioGroup
+            android:id="@+id/game_activity_radio_group"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="vertical">
-            <Button
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:padding="8dp">
+
+            <RadioButton
                 android:id="@+id/game_activity_button_1"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                android:padding="4dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:cornerRadius="28dp"
-                tools:text="Answer1" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_button"
+                android:gravity="center"
+                android:text="Answer 1"
+                android:textSize="14sp" />
 
-            <Button
+            <RadioButton
                 android:id="@+id/game_activity_button_2"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                android:padding="4dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:cornerRadius="28dp"
-                tools:text="Answer2" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/round_button"
+                android:gravity="center"
+                android:text="Answer 2"
+                android:textSize="14sp" />
 
-            <Button
+            <RadioButton
                 android:id="@+id/game_activity_button_3"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                android:padding="4dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:cornerRadius="28dp"
-                tools:text="Answer3" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/round_button"
+                android:gravity="center"
+                android:text="Answer 3"
+                android:textSize="14sp" />
 
-            <Button
+            <RadioButton
                 android:id="@+id/game_activity_button_4"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                android:padding="4dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:cornerRadius="28dp"
-                tools:text="Answer4" />
-        </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/round_button"
+                android:gravity="center"
+                android:text="Answer 4"
+                android:textSize="14sp" />
+
+        </RadioGroup>
 
 
     </LinearLayout>

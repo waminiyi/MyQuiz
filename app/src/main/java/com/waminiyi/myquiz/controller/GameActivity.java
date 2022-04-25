@@ -7,9 +7,9 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,14 +24,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 
-public class GameActivity extends AppCompatActivity implements View.OnClickListener {
+public class GameActivity extends AppCompatActivity {
 
     private TextView mQuestionTextView;
-    private Button mAnswerButton1;
-    private Button mAnswerButton2;
-    private Button mAnswerButton3;
-    private Button mAnswerButton4;
-    private View mChoiceView;
+    private RadioButton mAnswerButton1;
+    private RadioButton mAnswerButton2;
+    private RadioButton mAnswerButton3;
+    private RadioButton mAnswerButton4;
+    private RadioGroup mRadioGroup;
+    private int mGameHighScore;
     private final int mTotalQuestionCount = 4;
     private int mQuestionCount;
     private Question mCurrentQuestion;
@@ -39,7 +40,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private TextView mQuestionCountTextView;
     private ProgressBar mProgressBar;
     private TextView mTimerTextView;
-    private int mGameHighScore;
     private int progress;
     private int mScore;
     private boolean mAnswered;
@@ -85,8 +85,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerButton2 = findViewById(R.id.game_activity_button_2);
         mAnswerButton3 = findViewById(R.id.game_activity_button_3);
         mAnswerButton4 = findViewById(R.id.game_activity_button_4);
+        mRadioGroup = findViewById(R.id.game_activity_radio_group);
         mScoreTextView = findViewById(R.id.game_activity_textview_score);
-        mQuestionCountTextView=findViewById(R.id.game_activity_textview_question_count);
+        mQuestionCountTextView = findViewById(R.id.game_activity_textview_question_count);
         mProgressBar = findViewById(R.id.progress_bar);
         mTimerTextView = findViewById(R.id.game_activity_timer_text);
 
@@ -110,29 +111,40 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         // Le même listener est utilisé pour les 4 boutons en implémentant View.OnClickListener pour la GameActivity
         // L'id des boutons permettra de distinguer celui qui a été cliqué
-        mAnswerButton1.setOnClickListener(this);
+        /*mAnswerButton1.setOnClickListener(this);
         mAnswerButton2.setOnClickListener(this);
         mAnswerButton3.setOnClickListener(this);
-        mAnswerButton4.setOnClickListener(this);
+        mAnswerButton4.setOnClickListener(this);*/
+
+        mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                if (mAnswerButton1.isChecked() || mAnswerButton2.isChecked() || mAnswerButton3.isChecked()|| mAnswerButton4.isChecked()) {
+                    checkAnswer();
+                }
+            }
+        });
 
     }
 
-    @Override
+
+   /* @Override
     //vérification du choix du joueur
     public void onClick(View v) {
         //mise en place du lien entre le bouton cliqué et l'indice du choix correspondant
         mChoiceView = v;
         checkAnswer();
-    }
+    }*/
 
-    private void startNewGame(){
+    private void startNewGame() {
         mScore = 0;
         mQuestionList = generateQuestions();
         mQuestionCount = 0;
         displayNextQuestion(COUNTDOWN_IN_MILLIS);
     }
 
-    private void resumeCurrentGame(Bundle bundle){
+    private void resumeCurrentGame(Bundle bundle) {
         mQuestionList = bundle.getParcelableArrayList(STATE_QUESTION_LIST);
         mQuestionCount = bundle.getInt(STATE_QUESTION_INDEX);
         mScore = bundle.getInt(STATE_SCORE);
@@ -147,6 +159,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerButton3.setTextColor(Color.BLACK);
         mAnswerButton4.setTextColor(Color.BLACK);
 
+
         if (mQuestionCount < mTotalQuestionCount) {
 
             mCurrentQuestion = mQuestionList.get(mQuestionCount);
@@ -156,12 +169,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             mAnswerButton2.setText(mCurrentQuestion.getChoiceList().get(1));
             mAnswerButton3.setText(mCurrentQuestion.getChoiceList().get(2));
             mAnswerButton4.setText(mCurrentQuestion.getChoiceList().get(3));
+            mRadioGroup.clearCheck();
+
 
             mQuestionCount++;
             mScoreTextView.setText("Score : " + mScore);
             mQuestionCountTextView.setText("Question: " + mQuestionCount + "/" + mTotalQuestionCount);
             mAnswered = false;
-            mTimeLeftInMillis=duration;
+            mTimeLeftInMillis = duration;
             startCountDown();
 
         } else {
@@ -212,10 +227,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mCountDownTimer.cancel();
         mAnswered = true;
         mEnableTouchEvents = false;
-        int choiceIndex;
+        RadioButton answerSelected = findViewById(mRadioGroup.getCheckedRadioButtonId());
+        int answerIndex = mRadioGroup.indexOfChild(answerSelected); //indice du bouton radio cliqué
 
         //si la vue correspond au bouton1, alors la réponse choisie est la première dans notre liste
-        if (mChoiceView == mAnswerButton1) {
+        /*if (mChoiceView == mAnswerButton1) {
             choiceIndex = 0;
         } else if (mChoiceView == mAnswerButton2) {
             choiceIndex = 1;
@@ -225,9 +241,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             choiceIndex = 3;
         } else {
             throw new IllegalStateException("Unknown clicked view : " + mChoiceView);
-        }
+        }*/
 
-        if (choiceIndex == mCurrentQuestion.getAnswerIndex()) {
+        if (answerIndex == mCurrentQuestion.getAnswerIndex()) {
             Toast.makeText(this, "Réponse correcte!", Toast.LENGTH_SHORT).show();
             int gain;
             gain = (int) ((300 * mTimeLeftInMillis) / COUNTDOWN_IN_MILLIS);
@@ -282,13 +298,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void endGame() {
-        if (mScore > mGameHighScore){
+        if (mScore>mGameHighScore){
             mGameHighScore=mScore;
         }
         //plus de questions? affichage du score final et fin du jeu
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.gameEnd) // définition du titre de la boîte de dialogue
-                .setMessage(R.string.score + mScore) // définition du texte à afficher dans la boite de dialogue
+                .setMessage("Votre score est : " + mScore) // définition du texte à afficher dans la boite de dialogue
                 .setPositiveButton(R.string.endGame, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -301,7 +317,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 })
                 .setNegativeButton(R.string.newGame, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                            startNewGame();
+                        startNewGame();
                     }
                 });
         builder.create();
