@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -18,10 +18,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.waminiyi.myquiz.R;
 import com.waminiyi.myquiz.model.Question;
+import com.waminiyi.myquiz.model.QuestionBank;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Locale;
 
 public class GameActivity extends AppCompatActivity {
@@ -31,11 +30,12 @@ public class GameActivity extends AppCompatActivity {
     private RadioButton mAnswerButton2;
     private RadioButton mAnswerButton3;
     private RadioButton mAnswerButton4;
+    private Button mConfirmButton;
     private RadioGroup mRadioGroup;
     private int mGameHighScore;
     private final int mTotalQuestionCount = 4;
-    private int mQuestionCount;
     private Question mCurrentQuestion;
+    private QuestionBank mQuestionBank;
     private TextView mScoreTextView;
     private TextView mQuestionCountTextView;
     private ProgressBar mProgressBar;
@@ -45,21 +45,14 @@ public class GameActivity extends AppCompatActivity {
     private boolean mAnswered;
     private final int COUNTDOWN_IN_MILLIS = 30000;
     public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE"; //clé associée au score
-    private boolean mEnableTouchEvents; // boolean pour gérer les clics
     public static final String STATE_SCORE = "BUNDLE_STATE_SCORE";// à utiliser comme clé pour sauvegarder le score dans le bundle
-    public static final String STATE_QUESTION_INDEX = "BUNDLE_STATE_QUESTION_INDEX";
     public static final String STATE_QUESTION_LIST = "BUNDLE_STATE_QUESTION_LIST";
     private CountDownTimer mCountDownTimer;//pour le minuteur
     private long mTimeLeftInMillis;
     private static final String STATE_MILLIS_LEFT = "STATE_MILLIS_LEFT";
     private static final String STATE_ANSWER = "STATE_ANSWER";
-    private ArrayList<Question> mQuestionList;
 
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        return mEnableTouchEvents && super.dispatchTouchEvent(ev);
-    }
 
     /*méthode qui gère la sauvegarde des données du jeu en cours pour qu'on les récupère en
     cas de destruction de l'activité
@@ -68,8 +61,8 @@ public class GameActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SCORE, mScore);
-        outState.putInt(STATE_QUESTION_INDEX, mQuestionCount);
-        outState.putParcelableArrayList(STATE_QUESTION_LIST, mQuestionList);
+        //outState.putInt(STATE_QUESTION_INDEX, mQuestionBank.getQuestionIndex());
+        outState.putParcelable(STATE_QUESTION_LIST, mQuestionBank);
         outState.putLong(STATE_MILLIS_LEFT, mTimeLeftInMillis);
         outState.putBoolean(STATE_ANSWER, mAnswered);
     }
@@ -87,6 +80,7 @@ public class GameActivity extends AppCompatActivity {
         mAnswerButton4 = findViewById(R.id.game_activity_button_4);
         mRadioGroup = findViewById(R.id.game_activity_radio_group);
         mScoreTextView = findViewById(R.id.game_activity_textview_score);
+        mConfirmButton = findViewById(R.id.button_confirm_next);
         mQuestionCountTextView = findViewById(R.id.game_activity_textview_question_count);
         mProgressBar = findViewById(R.id.progress_bar);
         mTimerTextView = findViewById(R.id.game_activity_timer_text);
@@ -94,15 +88,9 @@ public class GameActivity extends AppCompatActivity {
         mProgressBar.setMax(COUNTDOWN_IN_MILLIS);
 
         if (savedInstanceState != null) {// null si rien n'avait été sauvegardé
-
             resumeCurrentGame(savedInstanceState);
 
-            if (mAnswered) {
-                displayNextQuestion(COUNTDOWN_IN_MILLIS);
-            } else {
-                mQuestionCount--;
-                displayNextQuestion(mTimeLeftInMillis);
-            }
+
 
         } else {
             startNewGame();
@@ -111,78 +99,80 @@ public class GameActivity extends AppCompatActivity {
 
         // Le même listener est utilisé pour les 4 boutons en implémentant View.OnClickListener pour la GameActivity
         // L'id des boutons permettra de distinguer celui qui a été cliqué
-        /*mAnswerButton1.setOnClickListener(this);
-        mAnswerButton2.setOnClickListener(this);
-        mAnswerButton3.setOnClickListener(this);
-        mAnswerButton4.setOnClickListener(this);*/
 
-        mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        mConfirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-
-                if (mAnswerButton1.isChecked() || mAnswerButton2.isChecked() || mAnswerButton3.isChecked()|| mAnswerButton4.isChecked()) {
-                    checkAnswer();
+            public void onClick(View v) {
+                //vérifie que le joueur a bien choisi une réponse avant la validation
+                if (!mAnswered) {
+                    if (mAnswerButton1.isChecked() || mAnswerButton2.isChecked() || mAnswerButton3.isChecked() || mAnswerButton4.isChecked()) {
+                        checkAnswer();
+                    } else {
+                        Toast.makeText(GameActivity.this, "Merci de choisir une réponse", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    //c'est ici qu'il faudrait incrémenter la question
+                    displayNextQuestion(COUNTDOWN_IN_MILLIS);
                 }
             }
         });
-
     }
 
 
-   /* @Override
-    //vérification du choix du joueur
-    public void onClick(View v) {
-        //mise en place du lien entre le bouton cliqué et l'indice du choix correspondant
-        mChoiceView = v;
-        checkAnswer();
-    }*/
-
     private void startNewGame() {
         mScore = 0;
-        mQuestionList = generateQuestions();
-        mQuestionCount = 0;
+        mScoreTextView.setText("Score : " + mScore);
+        mQuestionBank = generateQuestions();
+        mQuestionBank.setQuestionIndex(0);
         displayNextQuestion(COUNTDOWN_IN_MILLIS);
     }
 
     private void resumeCurrentGame(Bundle bundle) {
-        mQuestionList = bundle.getParcelableArrayList(STATE_QUESTION_LIST);
-        mQuestionCount = bundle.getInt(STATE_QUESTION_INDEX);
+        mQuestionBank = bundle.getParcelable(STATE_QUESTION_LIST);
         mScore = bundle.getInt(STATE_SCORE);
         mTimeLeftInMillis = bundle.getLong(STATE_MILLIS_LEFT);
         mAnswered = bundle.getBoolean(STATE_ANSWER);
+        if (mAnswered) {
+            mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() - 1);
+            mCurrentQuestion=mQuestionBank.getCurrentQuestion();
+            updateCountDownText();
+            showAnswer();
+            mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() + 1);
+        } else {
+            startCountDown();
+        }
     }
 
-    private void displayNextQuestion(long duration) {
+    private void displayNextQuestion(long duration) {//ajouter des arguments à cette méthode notamment la durée, si l'on a déja répondu,afin de déterminer s'il faut lancer le compte à rebours
         // mise à jour de l'interface en affichant l'énoncé de la question et les choix possibles
         mAnswerButton1.setTextColor(Color.BLACK);
         mAnswerButton2.setTextColor(Color.BLACK);
         mAnswerButton3.setTextColor(Color.BLACK);
         mAnswerButton4.setTextColor(Color.BLACK);
+        mRadioGroup.clearCheck();
 
 
-        if (mQuestionCount < mTotalQuestionCount) {
+        if (mQuestionBank.getQuestionIndex() < mTotalQuestionCount) {
 
-            mCurrentQuestion = mQuestionList.get(mQuestionCount);
+            mCurrentQuestion = mQuestionBank.getCurrentQuestion();
 
             mQuestionTextView.setText(mCurrentQuestion.getQuestionText());
             mAnswerButton1.setText(mCurrentQuestion.getChoiceList().get(0));
             mAnswerButton2.setText(mCurrentQuestion.getChoiceList().get(1));
             mAnswerButton3.setText(mCurrentQuestion.getChoiceList().get(2));
             mAnswerButton4.setText(mCurrentQuestion.getChoiceList().get(3));
-            mRadioGroup.clearCheck();
 
 
-            mQuestionCount++;
-            mScoreTextView.setText("Score : " + mScore);
-            mQuestionCountTextView.setText("Question: " + mQuestionCount + "/" + mTotalQuestionCount);
+            mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() + 1);
+            mQuestionCountTextView.setText("Question: " + mQuestionBank.getQuestionIndex() + "/" + mTotalQuestionCount);
             mAnswered = false;
+            mConfirmButton.setText("Confimer");
             mTimeLeftInMillis = duration;
             startCountDown();
 
         } else {
             endGame();
         }
-        mEnableTouchEvents = true;// réactivation des boutons
 
     }
 
@@ -200,8 +190,7 @@ public class GameActivity extends AppCompatActivity {
             public void onFinish() {
                 mTimeLeftInMillis = 0;
                 updateCountDownText();
-                showAnswer();
-                displayNextQuestion(COUNTDOWN_IN_MILLIS);
+                checkAnswer();
             }
         }.start();
     }
@@ -226,22 +215,8 @@ public class GameActivity extends AppCompatActivity {
         //mise en place du lien entre le bouton cliqué et l'indice du choix correspondant
         mCountDownTimer.cancel();
         mAnswered = true;
-        mEnableTouchEvents = false;
         RadioButton answerSelected = findViewById(mRadioGroup.getCheckedRadioButtonId());
         int answerIndex = mRadioGroup.indexOfChild(answerSelected); //indice du bouton radio cliqué
-
-        //si la vue correspond au bouton1, alors la réponse choisie est la première dans notre liste
-        /*if (mChoiceView == mAnswerButton1) {
-            choiceIndex = 0;
-        } else if (mChoiceView == mAnswerButton2) {
-            choiceIndex = 1;
-        } else if (mChoiceView == mAnswerButton3) {
-            choiceIndex = 2;
-        } else if (mChoiceView == mAnswerButton4) {
-            choiceIndex = 3;
-        } else {
-            throw new IllegalStateException("Unknown clicked view : " + mChoiceView);
-        }*/
 
         if (answerIndex == mCurrentQuestion.getAnswerIndex()) {
             Toast.makeText(this, "Réponse correcte!", Toast.LENGTH_SHORT).show();
@@ -257,21 +232,20 @@ public class GameActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Réponse incorrecte!", Toast.LENGTH_SHORT).show();
         }
-        //désactivation des boutons après le choix de l'utilisateur
 
         showAnswer();
 
         /*Objet qui un temps d'exécution
         permet de faire patienter l'affichage de la question suivante le temps que le toaast disparaisse
          */
-        new Handler().postDelayed(new Runnable() {
+        /*new Handler().postDelayed(new Runnable() {
 
             @Override
             public void run() {
                 //code dont l'exécution doit atteindre la fin du toast
                 displayNextQuestion(COUNTDOWN_IN_MILLIS);
             }
-        }, 3_000); // temps d'exécution
+        }, 3_000); // temps d'exécution*/
 
     }
 
@@ -295,11 +269,16 @@ public class GameActivity extends AppCompatActivity {
                 mAnswerButton4.setTextColor(Color.GREEN);
                 break;
         }
+        if (mQuestionBank.getQuestionIndex() < mTotalQuestionCount) {
+            mConfirmButton.setText("Suivant");
+        } else {
+            mConfirmButton.setText("Terminer");
+        }
     }
 
     private void endGame() {
-        if (mScore>mGameHighScore){
-            mGameHighScore=mScore;
+        if (mScore > mGameHighScore) {
+            mGameHighScore = mScore;
         }
         //plus de questions? affichage du score final et fin du jeu
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -324,7 +303,7 @@ public class GameActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private ArrayList<Question> generateQuestions() {
+    private QuestionBank generateQuestions() {
         // création des questions
         Question question1 = new Question(
                 "Quel animal est le roitelet?",
@@ -508,13 +487,11 @@ public class GameActivity extends AppCompatActivity {
         );
 
         // renvoi de la banque de question
-        ArrayList<Question> list = new ArrayList<>(Arrays.asList(question1, question2, question3, question4, question5, question6,
+        return new QuestionBank(Arrays.asList(question1, question2, question3, question4, question5, question6,
                 question7, question8, question9, question10, question11, question12, question13, question14, question15,
                 question16, question17, question18, question19, question20, question21, question22, question23, question24,
                 question25, question26, question27, question28, question29, question30));
 
-        Collections.shuffle(list);
-        return list;
 
     }
 

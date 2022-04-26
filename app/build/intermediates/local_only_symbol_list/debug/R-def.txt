@@ -17,6 +17,7 @@ drawable light_icon_foreground
 drawable round_button
 drawable round_text_view
 drawable screens
+id button_confirm_next
 id game_activity_button_1
 id game_activity_button_2
 id game_activity_button_3

@@ -1836,6 +1836,7 @@ id blocking
 id bottom
 id bounce
 id buttonPanel
+id button_confirm_next
 id cache_measures
 id cancel_button
 id center
