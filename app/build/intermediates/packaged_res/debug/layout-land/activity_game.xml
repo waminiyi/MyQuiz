@@ -19,7 +19,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:layout_marginStart="8dp"
-            android:freezesText="true"
             android:layout_marginBottom="32dp"
             android:gravity="center"
             android:textColor="@color/white"
@@ -39,14 +38,13 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             android:gravity="center"
-            android:freezesText="true"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/game_activity_textview_score"
-            tools:text="Score : 0" />
+            tools:text="Question : 1/X" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/game_activity_timer"
@@ -73,7 +71,6 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@color/white"
-                android:freezesText="true"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@+id/progress_bar"
@@ -98,9 +95,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:freezesText="true"
             android:layout_marginBottom="4dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:background="@drawable/round_text_view"
             android:gravity="center"
             android:lineSpacingExtra="4dp"
@@ -112,35 +108,35 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="3"
             android:orientation="vertical">
 
             <RadioGroup
                 android:id="@+id/game_activity_radio_group"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:padding="8dp">
+                android:layout_weight="9">
 
                 <RadioButton
                     android:id="@+id/game_activity_button_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:freezesText="true"
                     android:background="@drawable/round_button"
                     android:gravity="center"
+                    android:layout_weight="1"
                     android:text="Answer 1"
                     android:textSize="14sp" />
 
                 <RadioButton
                     android:id="@+id/game_activity_button_2"
                     android:layout_width="match_parent"
-                    android:freezesText="true"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="1"
                     android:background="@drawable/round_button"
                     android:gravity="center"
                     android:text="Answer 2"
@@ -150,8 +146,8 @@
                     android:id="@+id/game_activity_button_3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:freezesText="true"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="1"
                     android:background="@drawable/round_button"
                     android:gravity="center"
                     android:text="Answer 3"
@@ -161,8 +157,8 @@
                     android:id="@+id/game_activity_button_4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:freezesText="true"
-                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="4dp"
                     android:background="@drawable/round_button"
                     android:gravity="center"
                     android:text="Answer 4"
@@ -172,18 +168,15 @@
             <Button
                 android:id="@+id/button_confirm_next"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_marginTop="16dp"
-                android:freezesText="true"
+                android:layout_height="0dp"
+                android:padding="4dp"
+                android:textSize="12dp"
+                android:layout_weight="2"
                 android:layout_gravity="center"
                 android:text="Confirmer"
-                app:cornerRadius="30dp" />
+                app:cornerRadius="24dp" />
 
         </LinearLayout>
-
-
-
 
     </LinearLayout>
 

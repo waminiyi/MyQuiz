@@ -89,9 +89,6 @@ public class GameActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {// null si rien n'avait été sauvegardé
             resumeCurrentGame(savedInstanceState);
-
-
-
         } else {
             startNewGame();
         }
@@ -112,7 +109,8 @@ public class GameActivity extends AppCompatActivity {
                     }
                 } else {
                     //c'est ici qu'il faudrait incrémenter la question
-                    displayNextQuestion(COUNTDOWN_IN_MILLIS);
+                    mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() + 1);
+                    displayNextQuestion(COUNTDOWN_IN_MILLIS,false);
                 }
             }
         });
@@ -124,7 +122,7 @@ public class GameActivity extends AppCompatActivity {
         mScoreTextView.setText("Score : " + mScore);
         mQuestionBank = generateQuestions();
         mQuestionBank.setQuestionIndex(0);
-        displayNextQuestion(COUNTDOWN_IN_MILLIS);
+        displayNextQuestion(COUNTDOWN_IN_MILLIS, false);
     }
 
     private void resumeCurrentGame(Bundle bundle) {
@@ -132,24 +130,20 @@ public class GameActivity extends AppCompatActivity {
         mScore = bundle.getInt(STATE_SCORE);
         mTimeLeftInMillis = bundle.getLong(STATE_MILLIS_LEFT);
         mAnswered = bundle.getBoolean(STATE_ANSWER);
+        displayNextQuestion(mTimeLeftInMillis, mAnswered);
         if (mAnswered) {
-            mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() - 1);
-            mCurrentQuestion=mQuestionBank.getCurrentQuestion();
-            updateCountDownText();
             showAnswer();
-            mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() + 1);
-        } else {
-            startCountDown();
         }
     }
 
-    private void displayNextQuestion(long duration) {//ajouter des arguments à cette méthode notamment la durée, si l'on a déja répondu,afin de déterminer s'il faut lancer le compte à rebours
+    private void displayNextQuestion(long duration, boolean answered) {//ajouter des arguments à cette méthode notamment la durée, si l'on a déja répondu,afin de déterminer s'il faut lancer le compte à rebours
         // mise à jour de l'interface en affichant l'énoncé de la question et les choix possibles
         mAnswerButton1.setTextColor(Color.BLACK);
         mAnswerButton2.setTextColor(Color.BLACK);
         mAnswerButton3.setTextColor(Color.BLACK);
         mAnswerButton4.setTextColor(Color.BLACK);
         mRadioGroup.clearCheck();
+        mAnswered=answered;
 
 
         if (mQuestionBank.getQuestionIndex() < mTotalQuestionCount) {
@@ -162,13 +156,16 @@ public class GameActivity extends AppCompatActivity {
             mAnswerButton3.setText(mCurrentQuestion.getChoiceList().get(2));
             mAnswerButton4.setText(mCurrentQuestion.getChoiceList().get(3));
 
-
-            mQuestionBank.setQuestionIndex(mQuestionBank.getQuestionIndex() + 1);
-            mQuestionCountTextView.setText("Question: " + mQuestionBank.getQuestionIndex() + "/" + mTotalQuestionCount);
-            mAnswered = false;
+            mQuestionCountTextView.setText("Question : " + (mQuestionBank.getQuestionIndex()+1) + "/" + mTotalQuestionCount);
             mConfirmButton.setText("Confimer");
             mTimeLeftInMillis = duration;
-            startCountDown();
+
+            if (mAnswered){
+                updateCountDownText();
+            }else{
+
+                startCountDown();
+            }
 
         } else {
             endGame();
@@ -269,7 +266,7 @@ public class GameActivity extends AppCompatActivity {
                 mAnswerButton4.setTextColor(Color.GREEN);
                 break;
         }
-        if (mQuestionBank.getQuestionIndex() < mTotalQuestionCount) {
+        if (mQuestionBank.getQuestionIndex()+1 < mTotalQuestionCount) {
             mConfirmButton.setText("Suivant");
         } else {
             mConfirmButton.setText("Terminer");
